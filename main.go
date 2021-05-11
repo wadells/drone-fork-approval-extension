@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/wadells/drone-approval/plugin"
 
@@ -10,6 +11,11 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/sirupsen/logrus"
+)
+
+var (
+	version = "unknown"
+	commit  = "unknown"
 )
 
 // config contains all configuration as environment variables
@@ -21,6 +27,16 @@ type config struct {
 func main() {
 	log := logrus.New()
 	log.Out = os.Stdout
+
+	if len(os.Args) > 1 {
+		if strings.Contains(os.Args[1], "version") {
+			log.Info("version:\t" + version)
+			log.Info("commit: \t" + commit)
+			return
+		} else {
+			log.Fatal("unexpected arguments: " + strings.Join(os.Args[1:], " "))
+		}
+	}
 
 	var cfg config
 	err := envconfig.Process("", &cfg)
