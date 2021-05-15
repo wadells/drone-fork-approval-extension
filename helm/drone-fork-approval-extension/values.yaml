@@ -1,0 +1,38 @@
+# Copyright 2021 walt@javins.net
+# Use of this code is governed by the GNU GPLv3 found in the LICENSE file.
+secret: ""
+
+replicaCount: 1
+
+image:
+  repository: wadells/drone-fork-approval-extension
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations:
+  seccomp.security.alpha.kubernetes.io/pod: runtime/default
+
+podSecurityContext: {}
+
+service:
+  type: ClusterIP
+  port: 3888
+
+resources:
+  requests:
+    memory: "1Mi"
+    cpu: "1m"
+  limits:
+    memory: "10Mi"
+    cpu: "10m"
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

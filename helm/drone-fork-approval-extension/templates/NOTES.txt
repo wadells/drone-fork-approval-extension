@@ -1,0 +1,19 @@
+1. Check that the pods are up and running:
+
+$ kubectl logs -n {{ .Release.Namespace }} -l 'app.kubernetes.io/name={{ include "drone-fork-approval-extension.name" . }}'
+time="2021-05-15T04:58:14Z" level=info msg="server listening on address :3888"
+
+2. Update your Drone deployment to call this extension.
+   Add one of the following to the Drone helm values file,
+   and upgrade the deployment:
+
+env:
+  DRONE_VALIDATE_PLUGIN_SECRET: <the secret you selected>
+  DRONE_VALIDATE_PLUGIN_ENDPOINT: {{ printf "http://%v:%v" (include "drone-fork-approval-extension.fullname" . ) .Values.service.port }}
+
+OR
+
+extraSecretNamesForEnvFrom:
+  - {{ include "drone-fork-approval-extension.fullname" . }}
+podAnnotations:
+  checksum/{{ include "drone-fork-approval-extension.fullname" . }}: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}

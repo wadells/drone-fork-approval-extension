@@ -1,0 +1,67 @@
+# Copyright 2021 walt@javins.net
+# Use of this code is governed by the GNU GPLv3 found in the LICENSE file.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "drone-fork-approval-extension.fullname" . }}
+  labels:
+    {{- include "drone-fork-approval-extension.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "drone-fork-approval-extension.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ .Values.secret | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "drone-fork-approval-extension.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      automountServiceAccountToken: false
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - all
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 3888
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: DRONE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "drone-fork-approval-extension.fullname" . }}
+                  key: DRONE_VALIDATE_PLUGIN_SECRET
+          ports:
+            - name: http
+              containerPort: 3888
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
