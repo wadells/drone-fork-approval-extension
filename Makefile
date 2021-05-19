@@ -52,11 +52,14 @@ help: ## Show this message.
 clean: ## Remove build artifacts.
 	rm -rf $(BUILDDIR)
 
+$(BUILDDIR):
+	mkdir -p $(BUILDDIR)
+
 .PHONY: build
 build: ## Build the binary.
 build: $(OUT)
 
-$(OUT): $(GOSRC) $(MAKEFILE)
+$(OUT): $(GOSRC) $(MAKEFILE) | $(BUILDDIR)
 	go build $(LDFLAGS) -v -o $(OUT) $(ROOTDIR)
 
 .PHONY: test
