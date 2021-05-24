@@ -25,7 +25,7 @@ $ docker run --detach \
   --publish=3888:3888 \
   --env=DRONE_SECRET \
   --name=drone-approval \
-  wadells/drone-fork-approval-extension:0.1.0
+  wadells/drone-fork-approval-extension:0.2.0
 ```
 
 
